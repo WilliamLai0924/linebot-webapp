@@ -5,6 +5,8 @@ from flask import (Flask, redirect, render_template, request,
 
 app = Flask(__name__)
 
+TOKEN = os.environ.get('LINE_TOKEN', None)
+SECRET = os.environ.get('LINE_SECRET', None)
 
 @app.route('/')
 def index():
@@ -30,7 +32,7 @@ def hello():
 
 @app.route('/hi',methods=['get'])
 def hi():
-    return 'how r you'
+    return TOKEN
 
 if __name__ == '__main__':
    app.run()
