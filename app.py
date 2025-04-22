@@ -28,5 +28,9 @@ def hello():
        return redirect(url_for('index'))
 
 
+@app.route('/hi',methods=['get'])
+def hi():
+    return 'how r you'
+
 if __name__ == '__main__':
    app.run()
