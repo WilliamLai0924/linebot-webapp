@@ -1,24 +1,13 @@
 import os
-
-from flask import (Flask, redirect, render_template, request,
+from flask import (Flask, jsonify, redirect, render_template, request,
                    send_from_directory, url_for, abort)
 
-from linebot import LineBotApi, WebhookHandler
-from linebot.exceptions import InvalidSignatureError
-from linebot.models import PostbackEvent, TextSendMessage, MessageEvent, TextMessage
-
 app = Flask(__name__)
-
-TOKEN = os.environ.get('LINE_TOKEN', None)
-SECRET = os.environ.get('LINE_SECRET', None)
-
-line_bot_api = LineBotApi(TOKEN)
-whhandler = WebhookHandler(SECRET)
 
 @app.route('/')
 def index():
    print('Request for index page received')
-   return render_template('index.html')
+   return render_template('shop.html')
 
 @app.route('/favicon.ico')
 def favicon():
@@ -36,29 +25,19 @@ def hello():
        print('Request for hello page received with no name or blank name -- redirecting')
        return redirect(url_for('index'))
 
-@app.route('/callback', methods=['POST'])
-def callback():
-    # 確認請求來自 LINE
-    signature = request.headers['X-Line-Signature']
+@app.route('/submit-order', methods=['POST'])
+def submit_order():
+    data = request.form
+    name = data.get('name')
+    product = data.get('product')
+    quantity = data.get('quantity')
 
-    # 獲取請求主體
-    body = request.get_data(as_text=True)
-    app.logger.info(f"Request body: {body}")
-
-    try:
-        whhandler.handle(body, signature)
-    except InvalidSignatureError:
-        abort(400)
-
-    return 'OK'
-
-@whhandler.add(MessageEvent,message=TextMessage)
-def handle_message(event):
-    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=str(f'{event}')))
+    # 回傳成功訊息
+    return jsonify({"message": f"訂單已送出成功！\n收到訂單：姓名={name}, 商品={product}, 數量={quantity}"})
 
 @app.route('/hi',methods=['get'])
 def hi():
-    return TOKEN
+    return 'GOOD'
 
 if __name__ == '__main__':
    app.run()
